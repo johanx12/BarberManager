@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citas — BarberManager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #C9A84C; --gold-light: #E8C96B; --gold-dim: rgba(201,168,76,0.12);
+            --bg: #080808; --surface: #111111; --surface2: #1a1a1a;
+            --text: #F0EAD6; --text-muted: #7a7060; --border: rgba(201,168,76,0.18);
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+        .navbar { position: sticky; top: 0; z-index: 100; background: rgba(8,8,8,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-brand-text { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); font-weight: 700; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link { color: var(--text-muted); text-decoration: none; padding: 7px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; transition: color 0.2s, background 0.2s; }
+        .nav-link:hover, .nav-link.active { color: var(--gold); background: var(--gold-dim); }
+        .btn-logout { background: transparent; border: 1px solid rgba(220,53,69,0.4); color: #e07070; border-radius: 8px; padding: 7px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .btn-logout:hover { background: rgba(220,53,69,0.15); }
+
+        .main { padding: 48px 40px; max-width: 1100px; margin: 0 auto; }
+
+        .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--text); }
+        .page-title span { color: var(--gold); }
+
+        .btn-new {
+            background: var(--gold); color: #080808; border: none; border-radius: 10px;
+            padding: 11px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-new:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+        .alert-success { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); border-radius: 10px; padding: 13px 16px; color: #90ee90; font-size: 14px; margin-bottom: 24px; }
+        .alert-error { background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.3); border-radius: 10px; padding: 13px 16px; color: #f08888; font-size: 14px; margin-bottom: 24px; }
+
+        .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .table-card table { width: 100%; border-collapse: collapse; }
+        .table-card thead { background: var(--surface2); }
+        .table-card th { padding: 14px 20px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); text-align: left; }
+        .table-card td { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.04); font-size: 14px; vertical-align: middle; }
+        .table-card tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .badge-fecha { font-size: 13px; color: var(--gold); font-weight: 500; }
+        .badge-nombre { font-weight: 500; }
+        .badge-servicio { background: var(--gold-dim); color: var(--gold); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
+
+        .btn-danger { background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.3); color: #e07070; border-radius: 7px; padding: 5px 13px; font-size: 13px; text-decoration: none; transition: all 0.2s; display: inline-block; }
+        .btn-danger:hover { background: rgba(220,53,69,0.25); }
+
+        .empty-state { padding: 60px 20px; text-align: center; }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+        .empty-state p { color: var(--text-muted); font-size: 15px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/dashboard" class="nav-brand">
+        <span>💈</span>
+        <span class="nav-brand-text">BarberManager</span>
+    </a>
+    <div class="nav-links">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <th:block th:if="${isAdmin}">
+            <a href="/clientes" class="nav-link">Clientes</a>
+            <a href="/barberos" class="nav-link">Barberos</a>
+            <a href="/servicios" class="nav-link">Servicios</a>
+        </th:block>
+        <a href="/citas" class="nav-link active">Citas</a>
+    </div>
+    <form action="/logout" method="post" style="margin:0;">
+        <button type="submit" class="btn-logout">Cerrar Sesión</button>
+    </form>
+</nav>
+
+<div class="main">
+    <div class="page-header">
+        <div class="page-title">📅 <span>Citas</span> Registradas</div>
+        <a href="/citas/nuevo" class="btn-new">➕ Nueva Cita</a>
+    </div>
+
+    <div th:if="${mensaje}" class="alert-success" th:text="${mensaje}"></div>
+    <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fecha y Hora</th>
+                    <th>Cliente</th>
+                    <th>Barbero</th>
+                    <th>Servicio</th>
+                    <th th:if="${isAdmin}">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(citas)}">
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-icon">📅</div>
+                            <p>No hay citas registradas aún.</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="c : ${citas}">
+                    <td th:text="${c.id}" style="color: var(--text-muted); font-size: 13px;"></td>
+                    <td><span class="badge-fecha" th:text="${#temporals.format(c.fechaHora, 'dd/MM/yyyy HH:mm')}"></span></td>
+                    <td><span class="badge-nombre" th:text="${c.cliente.nombre}"></span></td>
+                    <td th:text="${c.barbero.nombre}" style="color: var(--text-muted);"></td>
+                    <td><span class="badge-servicio" th:text="${c.servicio.nombre}"></span></td>
+                    <td th:if="${isAdmin}">
+                        <a th:href="@{/citas/eliminar/{id}(id=${c.id})}" class="btn-danger"
+                           onclick="return confirm('¿Eliminar esta cita?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

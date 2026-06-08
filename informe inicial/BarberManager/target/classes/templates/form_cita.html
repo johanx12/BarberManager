@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Cita — BarberManager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #C9A84C; --gold-light: #E8C96B; --gold-dim: rgba(201,168,76,0.12);
+            --bg: #080808; --surface: #111111; --surface2: #1a1a1a; --surface3: #222222;
+            --text: #F0EAD6; --text-muted: #7a7060; --border: rgba(201,168,76,0.18);
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(8,8,8,0.95); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-brand-text { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); font-weight: 700; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link { color: var(--text-muted); text-decoration: none; padding: 7px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; transition: color 0.2s, background 0.2s; }
+        .nav-link:hover { color: var(--gold); background: var(--gold-dim); }
+        .btn-logout { background: transparent; border: 1px solid rgba(220,53,69,0.4); color: #e07070; border-radius: 8px; padding: 7px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .btn-logout:hover { background: rgba(220,53,69,0.15); }
+
+        .main { padding: 48px 40px; max-width: 640px; margin: 0 auto; }
+
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--gold); }
+        .breadcrumb span { color: var(--text-muted); }
+
+        .page-title { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--text); margin-bottom: 32px; }
+        .page-title span { color: var(--gold); }
+
+        .form-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 40px; position: relative; overflow: hidden;
+        }
+        .form-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .form-group { margin-bottom: 24px; }
+        label { display: block; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 9px; }
+
+        input[type="datetime-local"], select {
+            width: 100%; background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 13px 16px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+            -webkit-appearance: none; appearance: none;
+        }
+        input[type="datetime-local"]:focus, select:focus {
+            border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7060' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px;
+        }
+        select option { background: #1a1a1a; color: var(--text); }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .actions { display: flex; gap: 12px; margin-top: 8px; }
+
+        .btn-primary {
+            flex: 1; background: var(--gold); color: #080808; border: none;
+            border-radius: 10px; padding: 14px 24px; font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .btn-secondary {
+            background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+            border-radius: 10px; padding: 14px 24px; text-decoration: none;
+            font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+            transition: all 0.2s; display: flex; align-items: center;
+        }
+        .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+        .alert-error {
+            background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.3);
+            border-radius: 10px; padding: 13px 16px; color: #f08888; font-size: 14px; margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/dashboard" class="nav-brand">
+        <span>💈</span>
+        <span class="nav-brand-text">BarberManager</span>
+    </a>
+    <div class="nav-links">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <th:block th:if="${isAdmin}">
+            <a href="/clientes" class="nav-link">Clientes</a>
+            <a href="/barberos" class="nav-link">Barberos</a>
+            <a href="/servicios" class="nav-link">Servicios</a>
+        </th:block>
+        <a href="/citas" class="nav-link active">Citas</a>
+    </div>
+    <form action="/logout" method="post" style="margin:0;">
+        <button type="submit" class="btn-logout">Cerrar Sesión</button>
+    </form>
+</nav>
+
+<div class="main">
+    <div class="breadcrumb">
+        <a href="/dashboard">Dashboard</a>
+        <span>/</span>
+        <a href="/citas">Citas</a>
+        <span>/</span>
+        <span>Nueva Cita</span>
+    </div>
+
+    <div class="page-title">📅 Nueva <span>Cita</span></div>
+
+    <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+    <div class="form-card">
+        <form action="/citas/guardar" method="post">
+
+            <div class="form-group">
+                <label>Fecha y Hora</label>
+                <input type="datetime-local" name="fechaHora" required>
+            </div>
+
+<div class="form-row">
+
+    <th:block th:if="${isAdmin}">
+        <div class="form-group">
+            <label>Cliente</label>
+            <select name="clienteId" required>
+                <option value="">— Seleccionar —</option>
+                <option th:each="c : ${clientes}"
+                        th:value="${c.id}"
+                        th:text="${c.nombre}">
+                </option>
+            </select>
+        </div>
+    </th:block>
+
+    <div class="form-group">
+        <label>Barbero</label>
+        <select name="barberoId" required>
+            <option value="">— Seleccionar —</option>
+            <option th:each="b : ${barberos}"
+                    th:value="${b.id}"
+                    th:text="${b.nombre}">
+            </option>
+        </select>
+    </div>
+
+</div>
+            <div class="form-group">
+                <label>Servicio</label>
+                <select name="servicioId" required>
+                    <option value="">— Seleccionar —</option>
+                    <option th:each="s : ${servicios}" th:value="${s.id}"
+                            th:text="${s.nombre + ' — $' + s.precio}"></option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <a href="/citas" class="btn-secondary">← Cancelar</a>
+                <button type="submit" class="btn-primary">Guardar Cita</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

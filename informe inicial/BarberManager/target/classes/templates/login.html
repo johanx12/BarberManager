@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberManager — Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #E8C96B;
+            --gold-dim: rgba(201,168,76,0.15);
+            --bg: #080808;
+            --surface: #111111;
+            --surface2: #1a1a1a;
+            --text: #F0EAD6;
+            --text-muted: #7a7060;
+            --border: rgba(201,168,76,0.2);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Decorative background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -30%;
+            left: -20%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .wrapper {
+            display: flex;
+            align-items: center;
+            gap: 80px;
+            padding: 40px;
+            animation: fadeIn 0.7s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand-side {
+            text-align: center;
+        }
+
+        .barber-icon {
+            font-size: 80px;
+            display: block;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .brand-tagline {
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .divider-v {
+            width: 1px;
+            height: 280px;
+            background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+            opacity: 0.3;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 44px 40px;
+            width: 360px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .login-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+
+        input::placeholder { color: #3a3530; }
+
+        .btn-login {
+            width: 100%;
+            background: var(--gold);
+            color: #080808;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            background: var(--gold-light);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(201,168,76,0.35);
+        }
+
+        .btn-login:active { transform: translateY(0); }
+
+        .hint {
+            margin-top: 24px;
+            padding: 14px;
+            background: var(--surface2);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .hint p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .hint code {
+            background: var(--gold-dim);
+            color: var(--gold-light);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .error-msg {
+            background: rgba(220,53,69,0.12);
+            border: 1px solid rgba(220,53,69,0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #f8a0a0;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 700px) {
+            .wrapper { flex-direction: column; gap: 32px; padding: 20px; }
+            .divider-v { width: 200px; height: 1px; }
+            .brand-name { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="brand-side">
+        <span class="barber-icon">💈</span>
+        <div class="brand-name">BarberManager</div>
+        <div class="brand-tagline">Sistema de Gestión</div>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <div class="login-card">
+        <h2>Bienvenido</h2>
+        <p>Ingresa tus credenciales para continuar</p>
+
+        <div th:if="${param.error}" class="error-msg">
+            ⚠️ Usuario o contraseña incorrectos.
+        </div>
+
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" name="username" placeholder="Tu nombre de usuario" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login">Ingresar al Sistema</button>
+        </form>
+
+        <div class="hint">
+            <p>👑 Admin: <code>admin</code> / <code>1234</code></p>
+            <p>👤 Cliente: <code>cliente</code> / <code>cliente123</code></p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

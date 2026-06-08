@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios — BarberManager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --gold: #C9A84C; --gold-light: #E8C96B; --gold-dim: rgba(201,168,76,0.12); --bg: #080808; --surface: #111111; --surface2: #1a1a1a; --text: #F0EAD6; --text-muted: #7a7060; --border: rgba(201,168,76,0.18); }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+        .navbar { position: sticky; top: 0; z-index: 100; background: rgba(8,8,8,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-brand-text { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); font-weight: 700; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link { color: var(--text-muted); text-decoration: none; padding: 7px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; transition: color 0.2s, background 0.2s; }
+        .nav-link:hover, .nav-link.active { color: var(--gold); background: var(--gold-dim); }
+        .btn-logout { background: transparent; border: 1px solid rgba(220,53,69,0.4); color: #e07070; border-radius: 8px; padding: 7px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .btn-logout:hover { background: rgba(220,53,69,0.15); }
+        .main { padding: 48px 40px; max-width: 900px; margin: 0 auto; }
+        .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--text); }
+        .page-title span { color: var(--gold); }
+        .btn-new { background: var(--gold); color: #080808; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+        .btn-new:hover { background: var(--gold-light); transform: translateY(-1px); }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        .service-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s; position: relative; overflow: hidden; }
+        .service-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .service-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+        .service-icon { font-size: 28px; }
+        .service-name { font-size: 17px; font-weight: 600; }
+        .service-price { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--gold); font-weight: 700; }
+        .service-price-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .service-actions { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
+        .btn-danger { background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.3); color: #e07070; border-radius: 7px; padding: 6px 14px; font-size: 13px; text-decoration: none; transition: all 0.2s; display: inline-block; }
+        .btn-danger:hover { background: rgba(220,53,69,0.25); }
+        .empty-state { padding: 60px 20px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+        .empty-state p { color: var(--text-muted); font-size: 15px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="nav-brand"><span>💈</span><span class="nav-brand-text">BarberManager</span></a>
+    <div class="nav-links">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <a href="/clientes" class="nav-link">Clientes</a>
+        <a href="/barberos" class="nav-link">Barberos</a>
+        <a href="/servicios" class="nav-link active">Servicios</a>
+        <a href="/citas" class="nav-link">Citas</a>
+    </div>
+    <form action="/logout" method="post" style="margin:0;"><button type="submit" class="btn-logout">Cerrar Sesión</button></form>
+</nav>
+<div class="main">
+    <div class="page-header">
+        <div class="page-title">🛎️ <span>Servicios</span></div>
+        <a href="/servicios/nuevo" class="btn-new">➕ Nuevo Servicio</a>
+    </div>
+    <div th:if="${#lists.isEmpty(servicios)}">
+        <div class="empty-state"><div class="empty-icon">🛎️</div><p>No hay servicios registrados.</p></div>
+    </div>
+    <div class="cards-grid" th:unless="${#lists.isEmpty(servicios)}">
+        <div class="service-card" th:each="s : ${servicios}">
+            <div class="service-icon">✂️</div>
+            <div class="service-name" th:text="${s.nombre}"></div>
+            <div class="service-price-label">Precio</div>
+            <div class="service-price" th:text="'$' + ${#numbers.formatDecimal(s.precio, 1, 2)}"></div>
+            <div class="service-actions">
+                <a th:href="@{/servicios/eliminar/{id}(id=${s.id})}" class="btn-danger" onclick="return confirm('¿Eliminar este servicio?')">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
